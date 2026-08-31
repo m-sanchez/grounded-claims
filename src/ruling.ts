@@ -35,7 +35,10 @@ export interface Ruling {
 
 export interface RulingOptions {
   chain?: Check[];
-  /** rejected fraction above which the surviving claims ship contested */
+  /** Rejected fraction STRICTLY above which the survivors ship contested.
+   * The default 0.5 means exactly half rejected still ships grounded
+   * (2 of 4 rejected: grounded; 3 of 4: contested). Lower it for a
+   * touchier answer. */
   contestedAbove?: number;
 }
 

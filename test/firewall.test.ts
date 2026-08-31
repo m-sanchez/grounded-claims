@@ -23,7 +23,10 @@ const FORBIDDEN: ReadonlyArray<RegExp> = [
   /XMLHttpRequest|WebSocket|EventSource/
 ];
 
-const files = readdirSync(SRC).filter((f) => f.endsWith('.ts'));
+// recursive: a file added in a subdirectory tomorrow is covered today
+const files = readdirSync(SRC, { recursive: true })
+  .map(String)
+  .filter((f) => f.endsWith('.ts'));
 
 test('the src tree exists and is non-trivial (sanity)', () => {
   assert.ok(files.length >= 5);

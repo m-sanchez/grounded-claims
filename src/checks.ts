@@ -56,7 +56,15 @@ export function support(
     name: 'support',
     kind: 'decisive',
     run: (claim, cited) => {
-      const score = scorer(claim, cited);
+      let score: number;
+      try {
+        score = scorer(claim, cited);
+      } catch (err) {
+        return { ok: false, reason: `scorer errored: ${err}; an error is not a pass` };
+      }
+      if (Number.isNaN(score)) {
+        return { ok: false, reason: 'scorer returned NaN; not-a-number is not a pass' };
+      }
       return score >= floor
         ? { ok: true }
         : { ok: false, reason: `support ${score.toFixed(3)} below floor ${floor}` };
@@ -64,15 +72,21 @@ export function support(
   };
 }
 
-/** An opinion with a microphone and no gavel. Whatever it returns is
- * recorded; the kind guarantees it never decides. */
+/** An opinion with a microphone and no gavel. Whatever it returns - or
+ * however it fails - is recorded; the kind guarantees it never decides. */
 export function judge(
   opinion: (claim: Claim, cited: Evidence[]) => string
 ): Check {
   return {
     name: 'judge',
     kind: 'advisory',
-    run: (claim, cited) => ({ ok: true, reason: opinion(claim, cited) })
+    run: (claim, cited) => {
+      try {
+        return { ok: true, reason: opinion(claim, cited) };
+      } catch (err) {
+        return { ok: true, reason: `judge errored (still advisory): ${err}` };
+      }
+    }
   };
 }
 

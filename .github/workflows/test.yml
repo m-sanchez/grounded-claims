@@ -1,0 +1,37 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm pack
+      - name: install proof
+        run: |
+          mkdir -p "$RUNNER_TEMP/scratch" && cd "$RUNNER_TEMP/scratch"
+          npm init -y > /dev/null
+          npm install "$GITHUB_WORKSPACE"/grounded-claims-*.tgz
+          node -e "import('grounded-claims').then(m => { if (Object.keys(m).length === 0) throw new Error('empty module'); console.log('import ok'); })"
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+      - run: npm ci
+      - name: full suite with no network permission
+        run: node --permission --allow-fs-read=* --allow-fs-write=* --allow-child-process --test "test/*.test.ts"

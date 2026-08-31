@@ -101,3 +101,46 @@ test('identifier extraction sees dates, ids, codes, and multi-digit numbers only
   assert.ok(!found.includes('3'), 'single digits are grammar, not data');
   assert.ok(!found.includes('4471'), 'parts of a larger identifier are not separate identifiers');
 });
+
+test('a throwing judge is still advisory: recorded, never decisive, never a crash', () => {
+  const exploding = judge(() => {
+    throw new Error('opinion machine on fire');
+  });
+  const ruling = rule(
+    [{ text: 'the review cleared account led-4471', cites: ['ev-review'] }],
+    EVIDENCE,
+    { chain: [citations(), verbatim(), exploding] }
+  );
+  assert.equal(ruling.verdicts[0].status, 'accepted');
+  assert.match(ruling.verdicts[0].notes[0], /still advisory.*on fire/);
+});
+
+test('a throwing scorer is a named rejection, and NaN is not a pass', () => {
+  const throwing = rule(
+    [{ text: 'two flags raised', cites: ['ev-flags'] }],
+    EVIDENCE,
+    { chain: [citations(), verbatim(), support(() => { throw new Error('model down'); }, 0.5)] }
+  );
+  assert.equal(throwing.verdicts[0].failedCheck, 'support');
+  assert.match(throwing.verdicts[0].reason!, /an error is not a pass/);
+
+  const nan = rule(
+    [{ text: 'two flags raised', cites: ['ev-flags'] }],
+    EVIDENCE,
+    { chain: [citations(), verbatim(), support(() => NaN, 0.5)] }
+  );
+  assert.match(nan.verdicts[0].reason!, /not-a-number is not a pass/);
+});
+
+test('exactly half rejected still ships grounded; strictly more ships contested', () => {
+  const half = rule(
+    [
+      { text: 'the review cleared account led-4471', cites: ['ev-review'] },
+      { text: 'account led-4471 made 128 transfers', cites: ['ev-ledger'] },
+      { text: 'led-9001 was involved', cites: ['ev-ledger'] },
+      { text: 'exactly 555 transfers', cites: ['ev-ledger'] }
+    ],
+    EVIDENCE
+  );
+  assert.equal(half.status, 'grounded');
+});
