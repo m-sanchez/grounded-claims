@@ -1,0 +1,39 @@
+{
+  "name": "grounded-claims",
+  "version": "1.0.0",
+  "description": "The verification kit: a check chain where the LLM judge is structurally advisory, a composer firewalled from the network by test, replay from self-contained records.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --experimental-strip-types --test \"test/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-sanchez/grounded-claims.git"
+  },
+  "author": "Miguel Sanchez <contact@miguelsanchez.co.uk>",
+  "license": "MIT",
+  "keywords": [
+    "llm",
+    "hallucination",
+    "verification",
+    "guardrails",
+    "grounding",
+    "rag",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.7.0"
+  }
+}
