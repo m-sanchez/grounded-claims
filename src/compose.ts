@@ -26,6 +26,34 @@ export interface ComposeOptions {
   notes?: string[];
 }
 
+/** Claim text is model-authored, and the composed page is Markdown, so
+ * claim text that renders as document structure is a forgery vector: a
+ * claim carrying a newline, a rule, a heading, a block quote or its own
+ * `disclosure:` line composes a second, fake footer above the real one,
+ * indistinguishable to the reader. Such a claim invents no identifier, so
+ * verbatim has nothing to say about it - which makes this the composer's
+ * job, and a refusal rather than an escape: a claim that wants to be a
+ * document is drift, exactly like a claim edited after ruling. */
+const STRUCTURAL_OPENER = /^\s*(-{3,}|#|>|disclosure:)/m;
+const LINE_BREAK = /[\n\r\u2028\u2029]/;
+
+function refuseStructure(verdict: ClaimVerdict): void {
+  const text = verdict.claim.text;
+  if (LINE_BREAK.test(text)) {
+    throw new ComposeIntegrityError(
+      'accepted claim text contains a line break; claim text renders as one line, never as document structure',
+      verdict
+    );
+  }
+  const opener = STRUCTURAL_OPENER.exec(text);
+  if (opener) {
+    throw new ComposeIntegrityError(
+      `accepted claim text opens with markdown structure (${opener[1]}); a claim may not render as a rule, heading, quote or disclosure line`,
+      verdict
+    );
+  }
+}
+
 /** Render a ruling to Markdown. Refusals compose too: an insufficient
  * ruling renders its statement, never an empty confident page. */
 export function compose(ruling: Ruling, evidence: Evidence[], opts: ComposeOptions = {}): string {
@@ -42,6 +70,7 @@ export function compose(ruling: Ruling, evidence: Evidence[], opts: ComposeOptio
     for (const verdict of ruling.accepted) {
       // Paranoia at the last gate: the verdict says accepted, the composer
       // still re-derives it. A claim edited after ruling dies here.
+      refuseStructure(verdict);
       const cited = verdict.claim.cites.map((id) => index.get(id));
       if (cited.some((e) => e == null)) {
         throw new ComposeIntegrityError(
