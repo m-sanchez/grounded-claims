@@ -6,9 +6,10 @@
  * counts alone - claims carry no confidence, so there is no number to
  * argue with, only outcomes. */
 
+import { containedFailure, frozenView } from './containment.ts';
 import { indexEvidence } from './evidence.ts';
 import type { Claim, Evidence } from './evidence.ts';
-import type { Check } from './checks.ts';
+import type { Check, CheckResult } from './checks.ts';
 import { defaultChain } from './checks.ts';
 
 export interface ClaimVerdict {
@@ -16,6 +17,8 @@ export interface ClaimVerdict {
   status: 'accepted' | 'rejected';
   /** which decisive check ended it, when one did */
   failedCheck?: string;
+  /** stable machine-readable cause, e.g. 'verbatim/fabricated-token' */
+  code?: string;
   reason?: string;
   /** advisory output, and any oddities worth keeping */
   notes: string[];
@@ -45,15 +48,46 @@ export interface RulingOptions {
 export function judgeClaim(claim: Claim, evidence: Map<string, Evidence>, chain: Check[]): ClaimVerdict {
   const cited = claim.cites.map((id) => evidence.get(id)).filter((e): e is Evidence => e != null);
   const missing = claim.cites.filter((id) => !evidence.has(id));
+  // What the chain sees is a frozen deep copy, built once and shared by
+  // every check: no check can rewrite the claim that ships, the evidence
+  // the record freezes, or what the next check in the chain is shown.
+  const claimView = frozenView(claim);
+  const citedView = frozenView(cited);
+  const missingView = frozenView(missing);
   const notes: string[] = [];
   for (const check of chain) {
-    const result = check.run(claim, cited, missing);
+    let result: CheckResult;
+    try {
+      result = check.run(claimView, citedView, missingView);
+    } catch (err) {
+      // Includes the mutation case: a plug-in writing to its frozen view
+      // throws a TypeError here rather than changing anything.
+      if (check.kind === 'advisory') {
+        notes.push(`${check.name}: ${containedFailure('check', err)}`);
+        continue;
+      }
+      return {
+        claim,
+        status: 'rejected',
+        failedCheck: check.name,
+        code: 'check/error',
+        reason: containedFailure('check', err),
+        notes
+      };
+    }
     if (check.kind === 'advisory') {
       if (result.reason) notes.push(`${check.name}: ${result.reason}`);
       continue; // advisory is structurally unable to reject
     }
     if (!result.ok) {
-      return { claim, status: 'rejected', failedCheck: check.name, reason: result.reason, notes };
+      return {
+        claim,
+        status: 'rejected',
+        failedCheck: check.name,
+        code: result.code ?? `${check.name}/failed`,
+        reason: result.reason,
+        notes
+      };
     }
   }
   return { claim, status: 'accepted', notes };

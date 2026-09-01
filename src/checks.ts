@@ -9,6 +9,9 @@ import type { Claim, Evidence } from './evidence.ts';
 export interface CheckResult {
   ok: boolean;
   reason?: string;
+  /** stable machine-readable cause, for callers that must route on the
+   * failure rather than regex-match the prose. */
+  code?: string;
 }
 
 export interface Check {
@@ -25,7 +28,11 @@ export function citations(): Check {
     run: (_claim, _cited, missing) =>
       missing.length === 0
         ? { ok: true }
-        : { ok: false, reason: `cites evidence that does not exist: ${missing.join(', ')}` }
+        : {
+            ok: false,
+            code: 'citations/ghost-cite',
+            reason: `cites evidence that does not exist: ${missing.join(', ')}`
+          }
   };
 }
 
@@ -41,7 +48,11 @@ export function verbatim(): Check {
       const fabricated = fabricatedIn(claim.text, corpus);
       return fabricated.length === 0
         ? { ok: true }
-        : { ok: false, reason: `token(s) absent from cited evidence: ${fabricated.join(', ')}` }
+        : {
+            ok: false,
+            code: 'verbatim/fabricated-token',
+            reason: `token(s) absent from cited evidence: ${fabricated.join(', ')}`
+          }
     }
   };
 }
@@ -60,14 +71,18 @@ export function support(
       try {
         score = scorer(claim, cited);
       } catch (err) {
-        return { ok: false, reason: `scorer errored: ${err}; an error is not a pass` };
+        return { ok: false, code: 'support/scorer-error', reason: `scorer errored: ${err}; an error is not a pass` };
       }
       if (Number.isNaN(score)) {
-        return { ok: false, reason: 'scorer returned NaN; not-a-number is not a pass' };
+        return { ok: false, code: 'support/nan', reason: 'scorer returned NaN; not-a-number is not a pass' };
       }
       return score >= floor
         ? { ok: true }
-        : { ok: false, reason: `support ${score.toFixed(3)} below floor ${floor}` };
+        : {
+            ok: false,
+            code: 'support/below-floor',
+            reason: `support ${score.toFixed(3)} below floor ${floor}`
+          };
     }
   };
 }

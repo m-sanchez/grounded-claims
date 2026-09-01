@@ -8,6 +8,7 @@
  * finite - the hash is only as trustworthy as the bytes are stable. */
 
 import { createHash } from 'node:crypto';
+import { frozenView } from './containment.ts';
 import type { Claim, Evidence } from './evidence.ts';
 import { rule } from './ruling.ts';
 import type { Ruling, RulingOptions } from './ruling.ts';
@@ -52,16 +53,23 @@ export interface RunRecord {
 /** Freeze a run. The chain travels by name; replay rebuilds the default
  * chain, so records made with custom checks need those checks re-supplied. */
 export function record(claims: Claim[], evidence: Evidence[], opts: RulingOptions = {}): RunRecord {
+  // Snapshot the inputs BEFORE the chain runs. Checks are contained (see
+  // containment.ts), but the record is the audit trail: it must freeze the
+  // inputs as the caller supplied them, never as anything downstream left
+  // them. A record that agrees with itself about invented evidence is
+  // worse than no record.
+  const claimsAtEntry = frozenView(claims);
+  const evidenceAtEntry = frozenView(evidence);
   const ruling = rule(claims, evidence, opts);
   const body = {
     version: 1 as const,
-    claims,
-    evidence,
+    claims: claimsAtEntry,
+    evidence: evidenceAtEntry,
     options: { contestedAbove: opts.contestedAbove ?? 0.5 },
     chain: ruling.chain,
     ruling,
-    evidenceHash: hashOf(evidence),
-    claimsHash: hashOf(claims)
+    evidenceHash: hashOf(evidenceAtEntry),
+    claimsHash: hashOf(claimsAtEntry)
   };
   return { ...body, recordHash: hashOf(body) };
 }
