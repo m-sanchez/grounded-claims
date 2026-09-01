@@ -1,0 +1,251 @@
+{
+  "$schema": "family-canonical-form/v1",
+  "rule": "keys sorted by code unit; no insignificant whitespace; undefined properties omitted; finite numbers only; -0 normalised to 0; integers must be safe integers; non-integers must satisfy |x| >= 1e-4; SHA-256 hex over UTF-8 bytes",
+  "portability": "verified: 6014 values produce byte-identical text under ECMAScript Number::toString and Python repr",
+  "accept": [
+    {
+      "name": "null",
+      "value": null,
+      "canonical": "null",
+      "sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    {
+      "name": "true",
+      "value": true,
+      "canonical": "true",
+      "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+    },
+    {
+      "name": "false",
+      "value": false,
+      "canonical": "false",
+      "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+    },
+    {
+      "name": "empty string",
+      "value": "",
+      "canonical": "\"\"",
+      "sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    {
+      "name": "string with quotes and backslash",
+      "value": "he said \"hi\\\"",
+      "canonical": "\"he said \\\"hi\\\\\\\"\"",
+      "sha256": "0ab4eb5f46f6a7904ad685845a61aef9bdbcb3756442127e289ce22f2bd4343f"
+    },
+    {
+      "name": "string with unicode",
+      "value": "café ✓ 日本",
+      "canonical": "\"café ✓ 日本\"",
+      "sha256": "0a21757625e906adb83288dea95bb3d0463e1a7164429977064905712f1fe189"
+    },
+    {
+      "name": "zero",
+      "value": 0,
+      "canonical": "0",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "name": "negative zero",
+      "value": 0,
+      "canonical": "0",
+      "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    {
+      "name": "small int",
+      "value": 42,
+      "canonical": "42",
+      "sha256": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+    },
+    {
+      "name": "negative int",
+      "value": -17,
+      "canonical": "-17",
+      "sha256": "d3471dcc109cd382f5e09a64253c2219958b5f8f07371fba48ac81fed97bb18a"
+    },
+    {
+      "name": "max safe integer",
+      "value": 9007199254740991,
+      "canonical": "9007199254740991",
+      "sha256": "f40b423c2dd95ff2b2f027e22208f438cf7242862e5e746860e697308c9add26"
+    },
+    {
+      "name": "half",
+      "value": 0.5,
+      "canonical": "0.5",
+      "sha256": "d2cbad71ff333de67d07ec676e352ab7f38248eb69c942950157220607c55e84"
+    },
+    {
+      "name": "bar value",
+      "value": 0.6,
+      "canonical": "0.6",
+      "sha256": "b4af4e0d40391d3a00179d935c63b7e15ba8cd3dfa29f218dedc270bd3eb3e79"
+    },
+    {
+      "name": "bar value 0.9",
+      "value": 0.9,
+      "canonical": "0.9",
+      "sha256": "8139b33952401b3ee0e2ca84651cb9a1d7f66d442bf908f9cf1f53ea746e5801"
+    },
+    {
+      "name": "repeating decimal",
+      "value": 0.857142857,
+      "canonical": "0.857142857",
+      "sha256": "42fa7fdf2cfe78b2cbbf4322eb162438a924f29b4e4c7e4b122c0ee7f18bc999"
+    },
+    {
+      "name": "classic float",
+      "value": 0.1,
+      "canonical": "0.1",
+      "sha256": "14be4b45f18e0d8c67b4f719b5144eee88497e413709d11d85b096d8e2346310"
+    },
+    {
+      "name": "sum artefact",
+      "value": 0.30000000000000004,
+      "canonical": "0.30000000000000004",
+      "sha256": "06bad31060c1212ae832de4c031f7b31e3b48aed57858294478cb19450cf34ca"
+    },
+    {
+      "name": "magnitude floor exactly",
+      "value": 0.0001,
+      "canonical": "0.0001",
+      "sha256": "e539aebac7fd2ed8aba8854fedeaa65436962f8ee1c82341b394698f085b6496"
+    },
+    {
+      "name": "large non-integer",
+      "value": 123456.789,
+      "canonical": "123456.789",
+      "sha256": "df16e278bec8bd79b90a36552e05a4179549b0870da68fbe2580a8a920597ef4"
+    },
+    {
+      "name": "empty array",
+      "value": [],
+      "canonical": "[]",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "empty object",
+      "value": {},
+      "canonical": "{}",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "name": "nested",
+      "value": {
+        "b": 1,
+        "a": [
+          1,
+          2,
+          {
+            "d": 0.5,
+            "c": null
+          }
+        ]
+      },
+      "canonical": "{\"a\":[1,2,{\"c\":null,\"d\":0.5}],\"b\":1}",
+      "sha256": "13b73ccd70989fb33505d81a538302a1cbb8a7af5cfc35325607537e6fc0f08a"
+    },
+    {
+      "name": "key order differs",
+      "value": {
+        "z": 1,
+        "a": 2,
+        "m": 3
+      },
+      "canonical": "{\"a\":2,\"m\":3,\"z\":1}",
+      "sha256": "ebba85cfdc0a724b6cc327ecc545faeb38b9fe02eca603b430eb872f5cf75370"
+    },
+    {
+      "name": "undefined props omitted",
+      "value": {
+        "a": 1,
+        "c": 3
+      },
+      "canonical": "{\"a\":1,\"c\":3}",
+      "sha256": "ea89132f027adb270741ddeea16f07ee9921176fcef0ca74c33493f321b98620"
+    },
+    {
+      "name": "array of floats",
+      "value": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "canonical": "[0.1,0.2,0.3]",
+      "sha256": "9e9de4ffd2c4e28c8ca3764d2567d8ba1e2c1efcc3f64eb11fd77fd5b51a31b3"
+    },
+    {
+      "name": "realistic bar",
+      "value": {
+        "metric": "exact",
+        "op": ">=",
+        "value": 0.6
+      },
+      "canonical": "{\"metric\":\"exact\",\"op\":\">=\",\"value\":0.6}",
+      "sha256": "4f0b87d97bc0af372ee7a62772b1848beac575fba1865eda5705276240e42ca1"
+    },
+    {
+      "name": "realistic record",
+      "value": {
+        "version": 1,
+        "options": {
+          "contestedAbove": 0.5
+        },
+        "scores": [
+          {
+            "id": "a",
+            "v": 0.875
+          },
+          {
+            "id": "b",
+            "v": 1
+          }
+        ]
+      },
+      "canonical": "{\"options\":{\"contestedAbove\":0.5},\"scores\":[{\"id\":\"a\",\"v\":0.875},{\"id\":\"b\",\"v\":1}],\"version\":1}",
+      "sha256": "82cf6a9331198a6af1ed6cdf43577926b7e2f339650062264aa796ec01922145"
+    }
+  ],
+  "reject": [
+    {
+      "name": "NaN",
+      "kind": "nonFinite",
+      "reason": "NaN is not a finite number"
+    },
+    {
+      "name": "Infinity",
+      "kind": "nonFinite",
+      "reason": "Infinity is not a finite number"
+    },
+    {
+      "name": "-Infinity",
+      "kind": "nonFinite",
+      "reason": "-Infinity is not a finite number"
+    },
+    {
+      "name": "unsafe integer",
+      "kind": "unsafeInteger",
+      "reason": "9007199254740993 cannot be represented exactly"
+    },
+    {
+      "name": "tiny non-integer",
+      "kind": "belowFloor",
+      "reason": "1e-7 formats as 1e-7 in JS and 1e-07 in Python"
+    },
+    {
+      "name": "seven micro",
+      "kind": "belowFloor",
+      "reason": "0.000007 formats as 7e-06 in Python"
+    },
+    {
+      "name": "undefined at root",
+      "kind": "unsupportedType",
+      "reason": "undefined is not a value"
+    },
+    {
+      "name": "function",
+      "kind": "unsupportedType",
+      "reason": "functions have no canonical form"
+    }
+  ]
+}
