@@ -138,6 +138,7 @@ test('a throwing custom check is contained: named rejection if decisive, a note 
   const ruling = rule([{ text: 'all clear', cites: ['ev-flags'] }], EVIDENCE(), { chain: [rogue] });
   assert.equal(ruling.verdicts[0].status, 'rejected');
   assert.equal(ruling.verdicts[0].failedCheck, 'rogue');
+  assert.equal(ruling.verdicts[0].code, 'check/error');
   assert.match(ruling.verdicts[0].reason!, /exploded/);
 
   const rogueAdvisory: Check = { ...rogue, name: 'rogue-advisory', kind: 'advisory' };

@@ -80,3 +80,25 @@ test('every category verbatim claims to cover is covered completely', () => {
     assert.equal(row.caught, row.total, `${category}: ${row.caught}/${row.total} caught`);
   }
 });
+
+test('every row of the published per-category table is the measured one', () => {
+  // The README prints these ratios; if any of them moves, the README is
+  // wrong and this fails rather than the table quietly rotting.
+  const published: Record<string, string> = {
+    'digit-substring': '5/5',
+    'id-fragment': '2/2',
+    transposition: '2/2',
+    date: '3/3',
+    code: '2/2',
+    invention: '6/6',
+    'unit-blindness': '1/3',
+    'negation-blindness': '0/2',
+    'relation-blindness': '0/3',
+    faithful: '0/14'
+  };
+  const measured = tallyBy(() => true);
+  assert.deepEqual(
+    Object.fromEntries([...measured].map(([k, r]) => [k, `${r.caught}/${r.total}`])),
+    published
+  );
+});

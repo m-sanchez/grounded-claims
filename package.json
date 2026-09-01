@@ -1,10 +1,10 @@
 {
   "name": "@m-sanchez/grounded-claims",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "publishConfig": {
     "access": "public"
   },
-  "description": "The verification kit: a check chain where the LLM judge is structurally advisory, a composer firewalled from the network by test, replay from self-contained records.",
+  "description": "Cite-or-refuse for LLM answers, enforced in code: an ordered gate pipeline over the turn, a check chain over each claim, contained plug-ins, a composer that cannot introduce or forge, and replayable hashed run records.",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -37,6 +37,8 @@
     "guardrails",
     "grounding",
     "rag",
+    "citations",
+    "refusal",
     "typescript"
   ],
   "engines": {

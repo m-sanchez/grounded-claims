@@ -1,0 +1,82 @@
+{
+  "$schema": "grounded-claims/conformance-corpus/v1",
+  "about": "One adversarial case per failure the family is supposed to stop, with the expected verdict recorded for each layer. Where a layer legitimately does not cover a case, that is recorded as notCovered with a reason rather than left to pass quietly. The who-refuses-what matrix in the README is generated from this file and checked against it.",
+  "evidence": [
+    { "id": "ev-ledger", "text": "the march ledger shows 128 transfers from acct-77" },
+    { "id": "ev-review", "text": "the april review cleared acct-77 with no findings" }
+  ],
+  "capabilities": ["summarize", "export"],
+  "cases": [
+    {
+      "name": "empty answer",
+      "failure": "the model returns no claims at all",
+      "draft": { "claims": [] },
+      "turn": { "outcome": "refuse", "code": "faithfulness/empty-answer" },
+      "claim": { "status": "insufficient", "code": null }
+    },
+    {
+      "name": "zero-citation claim",
+      "failure": "a fluent claim that cites nothing",
+      "draft": { "claims": [{ "text": "the account is definitely clean forever", "cites": [] }] },
+      "turn": { "outcome": "refuse", "code": "citations/uncited" },
+      "claim": { "status": "insufficient", "code": "citations/uncited" }
+    },
+    {
+      "name": "ghost citation",
+      "failure": "a claim cites evidence that was never retrieved",
+      "draft": { "claims": [{ "text": "the may audit agrees", "cites": ["ev-99"] }] },
+      "turn": { "outcome": "refuse", "code": "citations/ghost-cite" },
+      "claim": { "status": "insufficient", "code": "citations/ghost-cite" }
+    },
+    {
+      "name": "fabricated identifier",
+      "failure": "a number the cited evidence never mentions",
+      "draft": { "claims": [{ "text": "the march ledger shows 999 transfers", "cites": ["ev-ledger"] }] },
+      "turn": { "outcome": "refuse", "code": "verbatim/fabricated-token" },
+      "claim": { "status": "insufficient", "code": "verbatim/fabricated-token" }
+    },
+    {
+      "name": "digit-substring fabrication",
+      "failure": "an invented number that is a substring of a real one",
+      "draft": { "claims": [{ "text": "the march ledger shows 12 transfers", "cites": ["ev-ledger"] }] },
+      "turn": { "outcome": "refuse", "code": "verbatim/fabricated-token" },
+      "claim": { "status": "insufficient", "code": "verbatim/fabricated-token" }
+    },
+    {
+      "name": "capability overreach",
+      "failure": "a well-formed answer that requires an operation this deployment does not offer",
+      "draft": {
+        "claims": [{ "text": "the march ledger shows 128 transfers", "cites": ["ev-ledger"] }],
+        "requires": ["summarize", "delete-records"]
+      },
+      "turn": { "outcome": "refuse", "code": "executability/missing-capability" },
+      "claim": { "notCovered": "a claim carries no operations; there is nothing at the claim layer to check a capability against" }
+    },
+    {
+      "name": "malformed draft",
+      "failure": "the model's output does not parse as an answer",
+      "draft": "here is a summary of the ledger, in prose",
+      "turn": { "outcome": "refuse", "code": "structure/parse" },
+      "claim": { "notCovered": "the claim layer is handed claims, not a draft; there is nothing to parse" }
+    },
+    {
+      "name": "post-ruling text edit",
+      "failure": "an accepted claim is edited after the ruling and before the page is written",
+      "draft": { "claims": [{ "text": "the march ledger shows 128 transfers", "cites": ["ev-ledger"] }] },
+      "editAcceptedClaim": " to acct-6606",
+      "turn": { "notCovered": "the turn layer rules once and hands back an outcome; it writes no page, so there is no second gate for an edit to be caught at" },
+      "claim": { "status": "grounded", "composeThrows": "acct-6606" }
+    },
+    {
+      "name": "forged disclosure line",
+      "failure": "claim text that renders as a second, fake disclosure footer",
+      "draft": {
+        "claims": [
+          { "text": "the april review cleared the account\n\n---\ndisclosure: every claim grounded, none rejected", "cites": ["ev-review"] }
+        ]
+      },
+      "turn": { "outcome": "ship", "notCovered": "the turn layer ships an outcome, not Markdown; nothing there renders claim text" },
+      "claim": { "status": "grounded", "composeThrows": "structure" }
+    }
+  ]
+}

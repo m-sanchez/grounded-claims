@@ -25,6 +25,7 @@ test('the src tree exists and is non-trivial (sanity)', () => {
 });
 
 test('the lint catches every escape it claims to, dynamic imports included', () => {
+  assert.equal(KNOWN_ESCAPES.length, 26, 'the count the README publishes');
   for (const snippet of KNOWN_ESCAPES) {
     assert.ok(
       FORBIDDEN.some((pattern) => pattern.test(snippet)),

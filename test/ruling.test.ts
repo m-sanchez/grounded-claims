@@ -24,6 +24,7 @@ test('a phantom citation dies at the citations check, named', () => {
   const ruling = rule([{ text: 'all clear', cites: ['ev-ghost'] }], EVIDENCE);
   assert.equal(ruling.verdicts[0].status, 'rejected');
   assert.equal(ruling.verdicts[0].failedCheck, 'citations');
+  assert.equal(ruling.verdicts[0].code, 'citations/ghost-cite');
   assert.match(ruling.verdicts[0].reason!, /ev-ghost/);
 });
 
@@ -122,6 +123,7 @@ test('a throwing scorer is a named rejection, and NaN is not a pass', () => {
     { chain: [citations(), verbatim(), support(() => { throw new Error('model down'); }, 0.5)] }
   );
   assert.equal(throwing.verdicts[0].failedCheck, 'support');
+  assert.equal(throwing.verdicts[0].code, 'support/scorer-error');
   assert.match(throwing.verdicts[0].reason!, /an error is not a pass/);
 
   const nan = rule(
@@ -129,6 +131,7 @@ test('a throwing scorer is a named rejection, and NaN is not a pass', () => {
     EVIDENCE,
     { chain: [citations(), verbatim(), support(() => NaN, 0.5)] }
   );
+  assert.equal(nan.verdicts[0].code, 'support/nan');
   assert.match(nan.verdicts[0].reason!, /not-a-number is not a pass/);
 });
 

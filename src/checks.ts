@@ -68,6 +68,18 @@ export function verbatim(): Check {
   };
 }
 
+/** Is this a promise? Checks here are synchronous by design - the package
+ * is offline, so the model call belongs outside it - and an async plug-in
+ * is the mistake an adopter is most likely to make. Naming it beats
+ * recording "[object Promise]" and shipping. */
+const isThenable = (value: unknown): boolean =>
+  value != null &&
+  (typeof value === 'object' || typeof value === 'function') &&
+  typeof (value as { then?: unknown }).then === 'function';
+
+const ASYNC_ADVICE =
+  'grounded-claims checks are synchronous; call your model outside the chain and thread the result in';
+
 /** Optional semantic gate: bring your own scorer (NLI, embeddings), state
  * the floor. Score and floor both land in the reason either way. */
 export function support(
@@ -83,6 +95,13 @@ export function support(
         score = scorer(claim, cited);
       } catch (err) {
         return { ok: false, code: 'support/scorer-error', reason: `scorer errored: ${err}; an error is not a pass` };
+      }
+      if (isThenable(score)) {
+        return {
+          ok: false,
+          code: 'support/async-scorer',
+          reason: `scorer returned a promise; ${ASYNC_ADVICE}`
+        };
       }
       if (Number.isNaN(score)) {
         return { ok: false, code: 'support/nan', reason: 'scorer returned NaN; not-a-number is not a pass' };
@@ -108,7 +127,10 @@ export function judge(
     kind: 'advisory',
     run: (claim, cited) => {
       try {
-        return { ok: true, reason: opinion(claim, cited) };
+        const said = opinion(claim, cited);
+        return isThenable(said)
+          ? { ok: true, reason: `opinion returned a promise, so it was not read; ${ASYNC_ADVICE}` }
+          : { ok: true, reason: said };
       } catch (err) {
         return { ok: true, reason: `judge errored (still advisory): ${err}` };
       }
