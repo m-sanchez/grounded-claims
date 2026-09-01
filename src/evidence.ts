@@ -55,11 +55,46 @@ export function identifiersIn(text: string): string[] {
   return [...new Set(kept.map((s) => s.token))];
 }
 
-/** Identifiers present in `text` but absent from `corpus`, comparison
- * case-insensitive and comma-blind for numbers. */
-export function fabricatedIn(text: string, corpus: string): string[] {
-  const haystack = corpus.toLowerCase().replace(/,/g, '');
-  return identifiersIn(text).filter(
-    (token) => !haystack.includes(token.toLowerCase().replace(/,/g, ''))
+/** Compare two identifiers as the same fact written twice: case-folded,
+ * thousands separators dropped, and a decimal fraction's trailing zeros
+ * trimmed. 1,280 and 1280 are one number; so are 128.00 and 128. */
+export function normaliseIdentifier(token: string): string {
+  const bare = token.toLowerCase().replace(/,/g, '');
+  return /^-?\d+\.\d+$/.test(bare) ? bare.replace(/0+$/, '').replace(/\.$/, '') : bare;
+}
+
+const escapeForRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Does `token` stand on its own in the corpus, or is it sitting inside a
+ * longer identifier? The boundary is deliberately not `\b`, which is happy
+ * on either side of a digit run: nothing alphanumeric and no hyphen or
+ * underscore may touch either end, and a following decimal point plus
+ * digit disqualifies too, because 128 is not 128.5. */
+function standsAlone(token: string, corpus: string): boolean {
+  const pattern = new RegExp(
+    `(?<![0-9A-Za-z_-])${escapeForRegExp(token)}(?![0-9A-Za-z_-])(?!\\.\\d)`,
+    'i'
   );
+  return pattern.test(corpus);
+}
+
+/** Identifiers present in `text` but absent from `corpus`.
+ *
+ * Token boundaries, never substrings. Substring containment is the failure
+ * this package exists to prevent: a hallucinated number is most often a
+ * digit-substring of a real one on the same page, so `includes()` accepts
+ * 47 against led-4471 and 12 against 128 - the exact shape of the lie.
+ *
+ * The corpus goes through the same identifiersIn pass as the claim, both
+ * sides are normalised, and the token sets are compared. A claim token the
+ * extractor never produces from the corpus (a caps code buried in
+ * lowercase prose, say) gets one more chance: it must appear in the raw
+ * corpus standing alone. */
+export function fabricatedIn(text: string, corpus: string): string[] {
+  const present = new Set(identifiersIn(corpus).map(normaliseIdentifier));
+  return identifiersIn(text).filter((token) => {
+    const normalised = normaliseIdentifier(token);
+    if (present.has(normalised)) return false;
+    return !standsAlone(token, corpus) && !standsAlone(normalised, corpus);
+  });
 }
