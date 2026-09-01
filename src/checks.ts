@@ -1,7 +1,13 @@
 /** The check chain. Each check is named and ordered; each is either
  * decisive or advisory, and that kind is structural: the runner records an
  * advisory result as a note whatever it says. An LLM judge plugged in here
- * can inform the record; it cannot flip an outcome. That is the point. */
+ * can inform the record; it cannot flip an outcome.
+ *
+ * "Cannot" is carried by construction rather than by convention. A check is
+ * handed a frozen deep copy of the claim and its evidence (see
+ * containment.ts), so it cannot decide by acting either - writing to what
+ * it was given throws, and the runner contains the throw. That is the
+ * point. */
 
 import { corpusOf, fabricatedIn } from './evidence.ts';
 import type { Claim, Evidence } from './evidence.ts';
@@ -47,9 +53,11 @@ export function citations(): Check {
   };
 }
 
-/** Identifier-like tokens in the claim must appear in the cited evidence.
- * A number, date, or id the evidence never mentions is named, and the
- * claim dies for it. */
+/** Identifier-like tokens in the claim must appear in the cited evidence,
+ * compared as normalised tokens at identifier boundaries and never as
+ * substrings: a fabricated number is usually a digit-substring of a real
+ * one on the same page. A number, date, or id the evidence never mentions
+ * is named, and the claim dies for it. */
 export function verbatim(): Check {
   return {
     name: 'verbatim',

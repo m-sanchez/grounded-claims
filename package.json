@@ -15,7 +15,8 @@
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "CLAIMS.md"
   ],
   "scripts": {
     "test": "node --test \"test/*.test.ts\"",
