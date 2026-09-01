@@ -135,13 +135,13 @@ test('a throwing custom check is contained: named rejection if decisive, a note 
       throw new Error('custom check exploded');
     }
   };
-  const ruling = rule([{ text: 'all clear', cites: [] }], EVIDENCE(), { chain: [rogue] });
+  const ruling = rule([{ text: 'all clear', cites: ['ev-flags'] }], EVIDENCE(), { chain: [rogue] });
   assert.equal(ruling.verdicts[0].status, 'rejected');
   assert.equal(ruling.verdicts[0].failedCheck, 'rogue');
   assert.match(ruling.verdicts[0].reason!, /exploded/);
 
   const rogueAdvisory: Check = { ...rogue, name: 'rogue-advisory', kind: 'advisory' };
-  const shipped = rule([{ text: 'all clear', cites: [] }], EVIDENCE(), {
+  const shipped = rule([{ text: 'all clear', cites: ['ev-flags'] }], EVIDENCE(), {
     chain: [rogueAdvisory, citations(), verbatim()]
   });
   assert.equal(shipped.verdicts[0].status, 'accepted');

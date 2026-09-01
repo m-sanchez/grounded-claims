@@ -20,19 +20,30 @@ export interface Check {
   run: (claim: Claim, cited: Evidence[], missing: string[]) => CheckResult;
 }
 
-/** Every cited id must resolve to an evidence record. */
+/** A claim must cite, and every cited id must resolve to an evidence
+ * record. The empty-cites case is the vacuous half of the same failure: a
+ * claim that cites nothing satisfies "every cite resolves" perfectly and is
+ * grounded in nothing at all. */
 export function citations(): Check {
   return {
     name: 'citations',
     kind: 'decisive',
-    run: (_claim, _cited, missing) =>
-      missing.length === 0
+    run: (claim, _cited, missing) => {
+      if (claim.cites.length === 0) {
+        return {
+          ok: false,
+          code: 'citations/uncited',
+          reason: 'cites nothing; a claim grounded in no evidence is not grounded'
+        };
+      }
+      return missing.length === 0
         ? { ok: true }
         : {
             ok: false,
             code: 'citations/ghost-cite',
             reason: `cites evidence that does not exist: ${missing.join(', ')}`
-          }
+          };
+    }
   };
 }
 
