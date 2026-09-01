@@ -7,6 +7,8 @@
 ![Firewall](https://img.shields.io/badge/network_imports-forbidden_by_test-B45309)
 ![License](https://img.shields.io/badge/license-MIT-6E6E6E)
 
+> **In plain English:** this checks that every claim is actually backed by the source it cites, so it cannot point to something that does not say what it claims.
+
 The verification kit. A model drafts claims about a body of evidence; this
 code decides which claims may reach the reader.
 
