@@ -6,6 +6,7 @@
 [![CI](https://github.com/m-sanchez/grounded-claims/actions/workflows/test.yml/badge.svg)](https://github.com/m-sanchez/grounded-claims/actions/workflows/test.yml)
 ![Firewall](https://img.shields.io/badge/network_imports-forbidden_by_test-B45309)
 ![License](https://img.shields.io/badge/license-MIT-6E6E6E)
+[![npm](https://img.shields.io/npm/v/@m-sanchez/grounded-claims?color=CB3837&logo=npm&logoColor=white)](https://www.npmjs.com/package/@m-sanchez/grounded-claims)
 
 > **In plain English:** this checks that every claim is actually backed by the source it cites, so it cannot point to something that does not say what it claims.
 
@@ -15,6 +16,9 @@ code decides which claims may reach the reader.
 [More tools](https://github.com/m-sanchez) ·
 [Working rules](https://miguelsanchez.co.uk/ethics) ·
 [The pattern, live](https://miguelsanchez.co.uk/careful-machine)
+
+*Provenance: this came out of one body of production LLM work, extracted and
+generalised into a standalone package. First published 2026-08-31.*
 
 Four structural guarantees, each carried by construction rather than
 convention:
@@ -39,7 +43,7 @@ convention:
    ruling from the record's frozen inputs and names every divergence.
 
 ```ts
-import { rule, compose, judge, record } from 'grounded-claims';
+import { rule, compose, judge, record } from '@m-sanchez/grounded-claims';
 
 const ruling = rule(claims, evidence, {
   chain: [citations(), verbatim(), judge(myLlmOpinion)]
@@ -92,11 +96,12 @@ interface.
 ## Install
 
 ```bash
-npm install github:m-sanchez/grounded-claims#v1.1.0
+npm install @m-sanchez/grounded-claims
 ```
 
-Not yet on npm; the pinned git tag is the supported install and CI proves
-the packed tarball imports cleanly. Zero runtime dependencies.
+Also installable from a pinned git tag:
+`github:m-sanchez/grounded-claims#v1.1.1`. CI proves the packed tarball
+imports cleanly. Zero runtime dependencies.
 
 ## Develop
 

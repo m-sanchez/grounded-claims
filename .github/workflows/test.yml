@@ -23,8 +23,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/scratch" && cd "$RUNNER_TEMP/scratch"
           npm init -y > /dev/null
-          npm install "$GITHUB_WORKSPACE"/grounded-claims-*.tgz
-          node -e "import('grounded-claims').then(m => { if (Object.keys(m).length === 0) throw new Error('empty module'); console.log('import ok'); })"
+          npm install "$GITHUB_WORKSPACE"/m-sanchez-grounded-claims-*.tgz
+          node -e "import('@m-sanchez/grounded-claims').then(m => { if (Object.keys(m).length === 0) throw new Error('empty module'); console.log('import ok'); })"
   offline:
     runs-on: ubuntu-latest
     steps:

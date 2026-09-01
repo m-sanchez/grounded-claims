@@ -1,6 +1,9 @@
 {
-  "name": "grounded-claims",
-  "version": "1.1.0",
+  "name": "@m-sanchez/grounded-claims",
+  "version": "1.1.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "The verification kit: a check chain where the LLM judge is structurally advisory, a composer firewalled from the network by test, replay from self-contained records.",
   "type": "module",
   "main": "./dist/index.js",
