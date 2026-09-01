@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "test": "node --test \"test/*.test.ts\"",
+    "test:offline": "node --permission --allow-fs-read=* --allow-fs-write=* --import ./test/no-network.ts --test --experimental-test-isolation=none \"test/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build"

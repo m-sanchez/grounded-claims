@@ -33,5 +33,27 @@ jobs:
         with:
           node-version: 26
       - run: npm ci
-      - name: full suite with no network permission
-        run: node --permission --allow-fs-read=* --allow-fs-write=* --allow-child-process --test "test/*.test.ts"
+      # The negative control comes first. Node has no network permission on
+      # any release, so the old `node --permission` job would have passed
+      # identically with the sandbox doing nothing; this step deliberately
+      # attempts a connection and fails the build unless the trap denies it.
+      - name: negative control - the trap must fire
+        run: |
+          node --import ./test/no-network.ts -e "
+            import('node:net').then((net) => {
+              try {
+                net.connect(80, '127.0.0.1');
+              } catch (err) {
+                if (err.code !== 'ERR_NO_NETWORK') {
+                  console.error('trap threw the wrong error:', err.code);
+                  process.exit(1);
+                }
+                console.log('trap fired:', err.code);
+                return;
+              }
+              console.error('a connection attempt escaped the trap');
+              process.exit(1);
+            });
+          "
+      - name: full suite under the network trap and no child processes
+        run: npm run test:offline
