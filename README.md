@@ -277,7 +277,7 @@ npm install @m-sanchez/grounded-claims
 ```
 
 Also installable from a pinned git tag:
-`github:m-sanchez/grounded-claims#v2.0.0`. CI proves the packed tarball
+`github:m-sanchez/grounded-claims#v2.0.1`. CI proves the packed tarball
 imports cleanly. Zero runtime dependencies.
 
 ## Develop
