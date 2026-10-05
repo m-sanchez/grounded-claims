@@ -29,18 +29,23 @@
     "type": "git",
     "url": "git+https://github.com/m-sanchez/grounded-claims.git"
   },
+  "homepage": "https://github.com/m-sanchez/grounded-claims#readme",
+  "bugs": {
+    "url": "https://github.com/m-sanchez/grounded-claims/issues"
+  },
   "author": "Miguel Sanchez <contact@miguelsanchez.co.uk>",
   "license": "MIT",
   "keywords": [
     "llm",
     "hallucination",
+    "grounding",
+    "citations",
+    "rag",
+    "evidence",
     "verification",
     "guardrails",
-    "grounding",
-    "rag",
-    "citations",
     "refusal",
-    "typescript"
+    "evaluation"
   ],
   "engines": {
     "node": ">=22.18"
