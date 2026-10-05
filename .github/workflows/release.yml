@@ -15,6 +15,9 @@ on:
     tags: ['v*']
 permissions:
   contents: read
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -22,16 +25,16 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
-          ref: ${{ inputs.publish_existing_tag }}
-      - uses: actions/setup-node@v5
+          ref: ${{ inputs.publish_existing_tag && format('refs/tags/{0}', inputs.publish_existing_tag) || '' }}
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - run: npm install -g npm@latest
+      - run: npm install -g npm@11.21.0
       - name: the tag must match package.json
         if: github.event_name == 'push' || inputs.publish_existing_tag
         env:
