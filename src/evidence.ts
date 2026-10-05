@@ -27,10 +27,11 @@ export function corpusOf(e: Evidence): string {
   return `${e.text} ${values}`.trim();
 }
 
-const IDENTIFIER_PATTERNS: ReadonlyArray<RegExp> = [
+export const IDENTIFIER_PATTERNS: ReadonlyArray<RegExp> = [
   /\d{4}-\d{2}-\d{2}/g, // dates
-  /\b[a-z]+[-_][a-z0-9_-]*\d[a-z0-9_-]*\b/gi, // hyphenated ids with a digit
-  /\b[A-Z]{2,}\d+[A-Z0-9]*\b/g, // caps codes
+  // hyphenated ids with a digit; only the first letters-then-separator start in a run can ever match
+  /\b(?=[a-z]+[-_])(?<!\b[a-z]+[-_][a-z0-9_-]*?)[a-z]+[-_](?=[a-z_-]*\d)[a-z0-9_-]*\b/gi,
+  /\b[A-Z]{2,}\d[A-Z0-9]*\b/g, // caps codes
   /\b\d[\d,.]+\b/g // numbers with two or more digits
 ];
 
